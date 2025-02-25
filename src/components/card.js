@@ -1,10 +1,8 @@
-const placeList = document.querySelector('.places__list') 
 const cardTemplate = document.querySelector('#card-template') 
 
-
-function createElement(dataForCards, deleteFunction) {
+export function createElement(dataForCards, deleteFunction, likeFunction) {
   const newElement = cardTemplate.content.cloneNode(true)
-  
+
   const newElementTitle = newElement.querySelector('.card__title')
   const newElementImg = newElement.querySelector('.card__image')
   newElementTitle.textContent = dataForCards.name
@@ -14,23 +12,21 @@ function createElement(dataForCards, deleteFunction) {
   const deleteButton = newElement.querySelector('.card__delete-button')
   deleteButton.addEventListener('click', deleteFunction)
 
+  const likeButton = newElement.querySelector('.card__like-button')
+  likeButton.addEventListener('click', likeFunction)
+
   return newElement
 }
 
-function deleteFunc (event) {
+
+
+export function deleteFunc (event) {
   event.target.closest('li').remove()
 }
 
-initialCards.forEach(function (item) {
-  const createrCards = createElement(item, deleteFunc)
-  placeList.append(createrCards)
-});
 
-
-
-
-
-
-
+export function likeFunction (event) {
+  event.target.classList.toggle('card__like-button_is-active')
+}
 
 
