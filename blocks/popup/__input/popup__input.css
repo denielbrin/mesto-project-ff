@@ -20,3 +20,22 @@
     line-height: 15px;
   }
 }
+
+
+
+.popup__input_type_error{
+  border-bottom-color: red;
+}
+
+
+/* изначально сообщение об ошибке скрыто */
+.error_massage {
+  display: none;
+  color: red;
+  font-size: 12px;
+}
+
+/* затем навешивается или скрывается класс, который его показывает */
+.popup__error_visible {
+  display: block;
+}

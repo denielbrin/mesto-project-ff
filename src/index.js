@@ -1,7 +1,11 @@
-import { createElement, deleteFunc, likeFunction } from './components/card.js';
-import { openPopup, closePopup, closePopupButton } from './components/modal.js';
+import { getUserData, getUserCards, sendUserData, sendNewCard, newAvatarFunction } from './components/api.js';
 
-import { initialCards } from './components/cards.js';
+import { createElement, deleteFunc, likeFunction } from './components/card.js';
+import { openPopup, closePopup, closePopupButton, cleanerPopupFields } from './components/modal.js';
+
+import { enableValidation, clearValidation, validationConfiguration } from './components/validation.js'; 
+
+// import { initialCards } from './components/cards.js';
 import '../pages/index.css';
 
 const placeList = document.querySelector('.places__list') 
@@ -22,20 +26,48 @@ const newLocationUrlInput = document.querySelector('.popup__input_type_url')
 
 const profileName = document.querySelector('.profile__title')
 const profileDescription = document.querySelector('.profile__description')
+const profileImage = document.querySelector('.profile__image')
 
-initialCards.forEach(function (item) {
-  const createrCards = createElement(item, deleteFunc, likeFunction, handleImageClick)
-  placeList.append(createrCards)
-});
+const popupAvatar = document.querySelector('.popup_type_new-avatar')
+const newAvatarInput = popupAvatar.querySelector('.popup__input_type_url')
+
+let userIdentNumber;
+
+Promise.all([getUserData(), getUserCards()])
+  .then(([user, card]) => {
+    insertUserDataFromServer(user.name, user.about, user.avatar)
+    userIdentNumber = user._id
+    insertCardDataFromServer(card, userIdentNumber)
+
+  })
+  .catch(error => {
+    console.error('Ошибка:', error);
+  });
+
+  function insertUserDataFromServer (userNameFromServer, userDescriptionFromServer, userAvatarFromServer) {
+    profileName.textContent = userNameFromServer
+    profileDescription.textContent = userDescriptionFromServer
+    profileImage.style.backgroundImage = `url(${userAvatarFromServer})`
+  }
+
+  function insertCardDataFromServer (cardsArray, userIdentNumber) {
+    cardsArray.forEach(function (item) {
+      const createrCards = createElement(item, deleteFunc, likeFunction, handleImageClick, userIdentNumber)
+      placeList.append(createrCards)
+    });
+  }
 
 document.addEventListener('click', closePopupButton)
 
 editButton.addEventListener('click', () => {
-  openPopup(popupEdit)
+  clearValidation(popupEdit, validationConfiguration) 
   fillTextContentToValue(nameInput, profileName, jobInput, profileDescription)
+  openPopup(popupEdit)
 })
 
 addButton.addEventListener('click', () => {
+  cleanerPopupFields(popupAdd) 
+  clearValidation(popupAdd, validationConfiguration) 
   openPopup(popupAdd)
 })
 
@@ -46,13 +78,27 @@ function fillTextContentToValue (firstTextContent, firstValue, secontTextContent
 
 function handleFormSubmitEdit(evt) {
   evt.preventDefault();
+
   const nameInputResult = nameInput.value
   const jobInputResult = jobInput.value
 
-  profileName.textContent = nameInputResult
-  profileDescription.textContent = jobInputResult
+  const submitButton = evt.submitter;
+  submitButton.textContent = "Сохранение...";
 
-  closePopup(popupEdit)
+  sendUserData (nameInputResult, jobInputResult)
+    .then((newUserData) => {
+      submitButton.textContent = "Сохранить";
+      newUserDataFromServer(newUserData)
+      closePopup(popupEdit)
+    })
+    .catch(error => {
+      console.error('Ошибка:', error);
+    });
+}
+
+function newUserDataFromServer(dataObject) {
+  profileName.textContent = dataObject.name
+  profileDescription.textContent = dataObject.about
 }
 
 popupEdit.addEventListener('submit', handleFormSubmitEdit);
@@ -60,21 +106,31 @@ popupEdit.addEventListener('submit', handleFormSubmitEdit);
 function handleFormSubmitAdd(evt) {
   evt.preventDefault();
 
-  const newObject = {
-    link: newLocationUrlInput.value, 
-    name: newLocationNameInput.value
-  }
-  
-  const newCardElement = createElement(newObject, deleteFunc, likeFunction, handleImageClick);
-  placeList.prepend(newCardElement);
+  const newLocationName = newLocationNameInput.value
+  const newLocationLink = newLocationUrlInput.value
 
+  const submitButton = evt.submitter;
+  submitButton.textContent = "Сохранение...";
+
+  sendNewCard (newLocationName, newLocationLink)
+  .then((newCardData) => {
+    submitButton.textContent = "Сохранить";
+    const newCardElement = createElement(newCardData, deleteFunc, likeFunction, handleImageClick, userIdentNumber);
+    placeList.prepend(newCardElement);
+    cleanerPopupCard ()
+    closePopup(popupAdd)
+  })
+  .catch(error => {
+    console.error('Ошибка:', error);
+  });
+}
+
+function cleanerPopupCard () {
   newLocationUrlInput.value = '';
   newLocationNameInput.value = '';
 
   const newPlaceForm = popupAdd.querySelector('.popup__form');
   newPlaceForm.reset();
-
-  closePopup(popupAdd)
 }
 
 popupAdd.addEventListener('submit', handleFormSubmitAdd);
@@ -96,3 +152,28 @@ function handleImageClick(event) {
 popups.forEach(popup => {
   popup.classList.add('popup_is-animated');
 });
+
+profileImage.addEventListener('click', function () {
+  clearValidation(popupAvatar, validationConfiguration) 
+  cleanerPopupFields(popupAvatar) 
+  openPopup(popupAvatar)
+})
+
+popupAvatar.addEventListener('submit', (evt) => {
+
+  const submitButton = evt.submitter;
+  submitButton.textContent = "Сохранение...";
+
+  evt.preventDefault();
+  newAvatarFunction(newAvatarInput.value)
+  .then((res) => {
+    submitButton.textContent = "Сохранить";
+    profileImage.style.backgroundImage = `url(${res.avatar})`
+    closePopup(popupAvatar)
+  })
+  .catch(error => {
+    console.error('Ошибка:', error);
+  });
+});
+
+enableValidation(validationConfiguration)
