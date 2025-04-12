@@ -17,6 +17,7 @@ const popupAdd = document.querySelector('.popup_type_new-card')
 const popupImage = document.querySelector('.popup_type_image') 
 
 const popupCaptionElement = popupImage.querySelector('.popup__caption');
+const popupImageElement = popupImage.querySelector('.popup__image');
 
 const editButton = document.querySelector('.profile__edit-button')
 const addButton = document.querySelector('.profile__add-button')
@@ -69,8 +70,8 @@ function insertCardDataFromServer (cardsArray, userIdentNumber) {
 }
 
 editButton.addEventListener('click', () => {
-  clearValidation(popupEdit, validationConfiguration) 
   fillTextContentToValue(nameInput, profileName, jobInput, profileDescription)
+  clearValidation(popupEdit, validationConfiguration) 
   openPopup(popupEdit)
 })
 
@@ -156,9 +157,6 @@ popupAdd.addEventListener('submit', handleFormSubmitAdd);
 function handleImageClick(event) {
   const imageSrc = event.target.src;
   const imageAlt = event.target.alt;
-
-  const popupImageElement = popupImage.querySelector('.popup__image');
-  // const popupCaptionElement = popupImage.querySelector('.popup__caption');
 
   popupImageElement.src = imageSrc;
   popupImageElement.alt = imageAlt;

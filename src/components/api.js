@@ -97,10 +97,7 @@ export const deleteLikeToPost = (cardId) => {
 export function newAvatarFunction(link) {
   return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: 'PATCH',
-    headers: {
-      authorization: '05c0f268-e183-4a41-a400-feb77ce4beca',
-      'Content-Type': 'application/json'
-    },
+    headers: config.headers,
     body: JSON.stringify({
       avatar: `${link}`
     })
