@@ -1,11 +1,10 @@
-export const validationConfiguration = {
-  formSelector: '.popup__form', 
-  inputSelector: '.popup__input', 
-  submitButtonSelector: '.popup__button', 
-  inactiveButtonClass: 'popup__button_disabled', 
-  inputErrorClass: 'popup__input_type_error',
-  errorClass: 'popup__error_visible' 
-}; 
+function enableButton (button, btnClass) {
+  button.classList.add(btnClass)
+}
+
+function turnOffButton (button, btnClass) {
+  button.classList.remove(btnClass)
+}
 
 export function clearValidation(formElement, validationConfiguration) {
   const inputList = Array.from(formElement.querySelectorAll(validationConfiguration.inputSelector));
@@ -16,16 +15,16 @@ export function clearValidation(formElement, validationConfiguration) {
   });
 
   buttonElement.disabled = true;
-  buttonElement.classList.add(validationConfiguration.inactiveButtonClass);
+  enableButton (buttonElement, validationConfiguration.inactiveButtonClass)
 }
 
 const toggleButtonState = (inputList, buttonElement, validationConfiguration) => {
   if (hasInvalidInput(inputList)) {
     buttonElement.disabled = true;
-    buttonElement.classList.add(validationConfiguration.inactiveButtonClass);
+    enableButton (buttonElement, validationConfiguration.inactiveButtonClass)
   } else {
     buttonElement.disabled = false;
-    buttonElement.classList.remove(validationConfiguration.inactiveButtonClass);
+    turnOffButton (buttonElement, validationConfiguration.inactiveButtonClass)
   }
 }; 
 

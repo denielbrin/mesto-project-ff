@@ -6,16 +6,22 @@ const config = {
   }
 };
 
+
+
+function getResponseData(res) {
+  if (!res.ok) {
+      return Promise.reject(`Ошибка: ${res.status}`); 
+  }
+  return res.json();
+} 
+
 export const getUserData = () => {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers
   })
   .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  });
+    return getResponseData(res)
+  })
 } 
 
 export const getUserCards = () => {
@@ -23,11 +29,8 @@ export const getUserCards = () => {
     headers: config.headers
   })
   .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  });
+    return getResponseData(res)
+  })
 } 
 
 export const sendUserData = (newName, newDescription) => {
@@ -40,11 +43,8 @@ export const sendUserData = (newName, newDescription) => {
     })
   })
   .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  });
+    return getResponseData(res)
+  })
 }
 
 export const sendNewCard = (locationName, locationLink) => {
@@ -57,11 +57,8 @@ export const sendNewCard = (locationName, locationLink) => {
     })
  })
  .then(res => {
-   if (res.ok) {
-     return res.json();
-   }
-     return Promise.reject(`Ошибка: ${res.status}`);
- });
+  return getResponseData(res)
+})
 }
 
 export const deleteCardFromServer = (cardId) => {
@@ -83,10 +80,7 @@ export const addLikeToPost = (cardId) => {
     headers: config.headers
   })
   .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-      return Promise.reject(`Ошибка: ${res.status}`);
+    return getResponseData(res)
   })
 }
 
@@ -96,15 +90,12 @@ export const deleteLikeToPost = (cardId) => {
     headers: config.headers
   })
   .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-      return Promise.reject(`Ошибка: ${res.status}`);
+    return getResponseData(res)
   })
 }
 
 export function newAvatarFunction(link) {
-  return fetch(`https://nomoreparties.co/v1/wff-cohort-34/users/me/avatar`, {
+  return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: 'PATCH',
     headers: {
       authorization: '05c0f268-e183-4a41-a400-feb77ce4beca',
@@ -115,9 +106,6 @@ export function newAvatarFunction(link) {
     })
   })
   .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-      return Promise.reject(`Ошибка: ${res.status}`);
+    return getResponseData(res)
   })
 }

@@ -1,22 +1,19 @@
-
 export function openPopup(popup) {
   popup.classList.add('popup_is-opened');
   document.addEventListener('keydown', escapeFunction)
-  document.addEventListener('click', popupFunction)
+  document.addEventListener('click', (event) => {
+    popupFunction(event)
+    closePopupButton(event)
+  })
 }
   
 export function closePopup(popup) {
   popup.classList.remove('popup_is-opened');
   document.removeEventListener('keydown', escapeFunction)
-  document.removeEventListener('click', popupFunction)
-}
-
-export function cleanerPopupFields(popup) { 
-  popup.querySelectorAll('.popup__input').forEach((element) => {  
-    if(element.value !== "") { 
-      element.value = ""
-    } 
-  });
+  document.removeEventListener('click', (event) => {
+    popupFunction(event)
+    closePopupButton(event)
+  })
 }
 
 function escapeFunction(event) {

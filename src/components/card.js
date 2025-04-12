@@ -24,7 +24,7 @@ export function createElement(dataForCards, deleteFunction, likeFunction, imageC
   cardLike.textContent = dataForCards.likes.length.toString()
 
   dataForCards.likes.forEach((element) => {
-    if(element._id === "f74bd461ebdcc3b81e02e565") {
+    if(element._id === userIdentNumber) {
       likeButton.classList.add('card__like-button_is-active')
     }
   })
@@ -40,7 +40,6 @@ export function createElement(dataForCards, deleteFunction, likeFunction, imageC
   return newElement
 }
 
-
 export function deleteFunc (event, cardId) {
   deleteCardFromServer(cardId)
     .then(() => {
@@ -50,8 +49,6 @@ export function deleteFunc (event, cardId) {
       console.error('Ошибка:', error);
     });
 } 
-
-
 
 export function likeFunction (event, cardId, countCard) {
   if(!event.target.classList.contains('card__like-button_is-active')) {

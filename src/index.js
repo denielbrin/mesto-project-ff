@@ -1,9 +1,9 @@
 import { getUserData, getUserCards, sendUserData, sendNewCard, newAvatarFunction } from './components/api.js';
 
 import { createElement, deleteFunc, likeFunction } from './components/card.js';
-import { openPopup, closePopup, closePopupButton, cleanerPopupFields } from './components/modal.js';
+import { openPopup, closePopup } from './components/modal.js';
 
-import { enableValidation, clearValidation, validationConfiguration } from './components/validation.js'; 
+import { enableValidation, clearValidation} from './components/validation.js'; 
 
 // import { initialCards } from './components/cards.js';
 import '../pages/index.css';
@@ -15,6 +15,8 @@ const popups = document.querySelectorAll('.popup');
 const popupEdit = document.querySelector('.popup_type_edit') 
 const popupAdd = document.querySelector('.popup_type_new-card') 
 const popupImage = document.querySelector('.popup_type_image') 
+
+const popupCaptionElement = popupImage.querySelector('.popup__caption');
 
 const editButton = document.querySelector('.profile__edit-button')
 const addButton = document.querySelector('.profile__add-button')
@@ -33,6 +35,15 @@ const newAvatarInput = popupAvatar.querySelector('.popup__input_type_url')
 
 let userIdentNumber;
 
+const validationConfiguration = {
+  formSelector: '.popup__form', 
+  inputSelector: '.popup__input', 
+  submitButtonSelector: '.popup__button', 
+  inactiveButtonClass: 'popup__button_disabled', 
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible' 
+}; 
+
 Promise.all([getUserData(), getUserCards()])
   .then(([user, card]) => {
     insertUserDataFromServer(user.name, user.about, user.avatar)
@@ -44,20 +55,18 @@ Promise.all([getUserData(), getUserCards()])
     console.error('Ошибка:', error);
   });
 
-  function insertUserDataFromServer (userNameFromServer, userDescriptionFromServer, userAvatarFromServer) {
-    profileName.textContent = userNameFromServer
-    profileDescription.textContent = userDescriptionFromServer
-    profileImage.style.backgroundImage = `url(${userAvatarFromServer})`
-  }
+function insertUserDataFromServer (userNameFromServer, userDescriptionFromServer, userAvatarFromServer) {
+  profileName.textContent = userNameFromServer
+  profileDescription.textContent = userDescriptionFromServer
+  profileImage.style.backgroundImage = `url(${userAvatarFromServer})`
+}
 
-  function insertCardDataFromServer (cardsArray, userIdentNumber) {
-    cardsArray.forEach(function (item) {
-      const createrCards = createElement(item, deleteFunc, likeFunction, handleImageClick, userIdentNumber)
-      placeList.append(createrCards)
-    });
-  }
-
-document.addEventListener('click', closePopupButton)
+function insertCardDataFromServer (cardsArray, userIdentNumber) {
+  cardsArray.forEach(function (item) {
+    const createrCards = createElement(item, deleteFunc, likeFunction, handleImageClick, userIdentNumber)
+    placeList.append(createrCards)
+  });
+}
 
 editButton.addEventListener('click', () => {
   clearValidation(popupEdit, validationConfiguration) 
@@ -76,6 +85,14 @@ function fillTextContentToValue (firstTextContent, firstValue, secontTextContent
   secontTextContent.value = secondValue.textContent
 }
 
+function cleanerPopupFields(popup) { 
+  popup.querySelectorAll('.popup__input').forEach((element) => {  
+    if(element.value !== "") { 
+      element.value = ""
+    } 
+  });
+}
+
 function handleFormSubmitEdit(evt) {
   evt.preventDefault();
 
@@ -87,13 +104,15 @@ function handleFormSubmitEdit(evt) {
 
   sendUserData (nameInputResult, jobInputResult)
     .then((newUserData) => {
-      submitButton.textContent = "Сохранить";
       newUserDataFromServer(newUserData)
       closePopup(popupEdit)
     })
     .catch(error => {
       console.error('Ошибка:', error);
-    });
+    })
+    .finally(() => {
+      submitButton.textContent = "Сохранить";
+    })
 }
 
 function newUserDataFromServer(dataObject) {
@@ -114,7 +133,6 @@ function handleFormSubmitAdd(evt) {
 
   sendNewCard (newLocationName, newLocationLink)
   .then((newCardData) => {
-    submitButton.textContent = "Сохранить";
     const newCardElement = createElement(newCardData, deleteFunc, likeFunction, handleImageClick, userIdentNumber);
     placeList.prepend(newCardElement);
     cleanerPopupCard ()
@@ -122,13 +140,13 @@ function handleFormSubmitAdd(evt) {
   })
   .catch(error => {
     console.error('Ошибка:', error);
-  });
+  })
+  .finally(() => {
+    submitButton.textContent = "Сохранить";
+  })
 }
 
 function cleanerPopupCard () {
-  newLocationUrlInput.value = '';
-  newLocationNameInput.value = '';
-
   const newPlaceForm = popupAdd.querySelector('.popup__form');
   newPlaceForm.reset();
 }
@@ -140,7 +158,7 @@ function handleImageClick(event) {
   const imageAlt = event.target.alt;
 
   const popupImageElement = popupImage.querySelector('.popup__image');
-  const popupCaptionElement = popupImage.querySelector('.popup__caption');
+  // const popupCaptionElement = popupImage.querySelector('.popup__caption');
 
   popupImageElement.src = imageSrc;
   popupImageElement.alt = imageAlt;
@@ -167,13 +185,15 @@ popupAvatar.addEventListener('submit', (evt) => {
   evt.preventDefault();
   newAvatarFunction(newAvatarInput.value)
   .then((res) => {
-    submitButton.textContent = "Сохранить";
     profileImage.style.backgroundImage = `url(${res.avatar})`
     closePopup(popupAvatar)
   })
   .catch(error => {
     console.error('Ошибка:', error);
-  });
+  })
+  .finally(() => {
+    submitButton.textContent = "Сохранить";
+  })
 });
 
 enableValidation(validationConfiguration)
